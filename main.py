@@ -22,7 +22,7 @@ try:
 except ImportError:
     DEPENDENCIES_INSTALLED = False
 
-@register("file_server", "本地文件服务器", "启动/停止多协议文件服务器（HTTP/FTP/WebDAV），支持自定义目录浏览。\n命令：/server start - 启动服务器\n/server stop - 停止服务器\n/server status - 查看状态", "1.0")
+@register("file_server", "本地文件服务器", "自动启动多协议文件服务器（HTTP/FTP/WebDAV），支持自定义目录浏览。\n使用 /img 获取随机图片。", "1.0")
 class FileServerPlugin(Star):
     def __init__(self, context: Context, config: dict):
         super().__init__(context)
@@ -38,7 +38,13 @@ class FileServerPlugin(Star):
         # 服务器状态管理
         self.server_threads: Dict[str, threading.Thread] = {}
         self.server_instances: Dict[str, any] = {}
-        self.is_running = False
+        
+        # ========== 插件加载时自动启动服务器 ==========
+        if DEPENDENCIES_INSTALLED:
+            self.start_servers()
+            print(f"\n✅ 文件服务器已自动启动！\n🌐 HTTP网页：http://localhost:{self.http_port}\n📁 FTP服务：ftp://localhost:{self.ftp_port}（匿名登录）\n🔗 WebDAV：http://localhost:{self.webdav_port}")
+        else:
+            print("\n❌ 文件服务器依赖未安装，请执行：\npip install flask waitress pyftpdlib wsgidav cheroot\nWindows需额外安装：pip install pywin32")
 
     # ========== 原有图片功能（保留） ==========
     @filter.command("img")
@@ -231,53 +237,15 @@ class FileServerPlugin(Star):
         app = WsgiDAVApp(dav_config)
         app.run()
 
-    # ========== 服务器控制命令 ==========
-    @filter.command("server")
-    async def server_control(self, event: AstrMessageEvent):
-        if not DEPENDENCIES_INSTALLED:
-            yield event.plain_result("\n❌ 依赖未安装，请执行：\npip install flask waitress pyftpdlib wsgidav cheroot\nWindows需额外安装：pip install pywin32")
-            return
-
-        args = event.args.strip().split()
-        if not args:
-            yield event.plain_result("\n📋 服务器命令：\n/server start - 启动服务器\n/server stop - 停止服务器\n/server status - 查看状态")
-            return
-
-        cmd = args[0].lower()
-
-        if cmd == "start":
-            if self.is_running:
-                yield event.plain_result("\n⚠️ 服务器已在运行中！")
-                return
-            
-            # 启动各服务线程
-            self.server_threads["http"] = threading.Thread(target=self.run_http_server, daemon=True)
-            self.server_threads["ftp"] = threading.Thread(target=self.run_ftp_server, daemon=True)
-            self.server_threads["webdav"] = threading.Thread(target=self.run_webdav_server, daemon=True)
-            
-            for t in self.server_threads.values():
-                t.start()
-            
-            self.is_running = True
-            yield event.plain_result(f"\n✅ 服务器启动成功！\n🌐 HTTP网页：http://localhost:{self.http_port}\n📁 FTP服务：ftp://localhost:{self.ftp_port}（匿名登录）\n🔗 WebDAV：http://localhost:{self.webdav_port}")
-
-        elif cmd == "stop":
-            if not self.is_running:
-                yield event.plain_result("\n⚠️ 服务器未运行！")
-                return
-            
-            # 停止FTP服务器
-            if "ftp" in self.server_instances:
-                self.server_instances["ftp"].close_all()
-            
-            self.is_running = False
-            yield event.plain_result("\n🛑 服务器已停止！")
-
-        elif cmd == "status":
-            if self.is_running:
-                yield event.plain_result(f"\n🟢 服务器运行中：\nHTTP: http://localhost:{self.http_port}\nFTP: ftp://localhost:{self.ftp_port}\nWebDAV: http://localhost:{self.webdav_port}")
-            else:
-                yield event.plain_result("\n🔴 服务器未运行！")
-
-        else:
-            yield event.plain_result("\n❌ 未知命令！支持：start/stop/status")
+    def start_servers(self):
+        """自动启动所有服务器线程"""
+        # HTTP服务线程
+        self.server_threads["http"] = threading.Thread(target=self.run_http_server, daemon=True)
+        # FTP服务线程
+        self.server_threads["ftp"] = threading.Thread(target=self.run_ftp_server, daemon=True)
+        # WebDAV服务线程
+        self.server_threads["webdav"] = threading.Thread(target=self.run_webdav_server, daemon=True)
+        
+        # 启动所有线程
+        for t in self.server_threads.values():
+            t.start()
