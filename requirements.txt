@@ -1,0 +1,6 @@
+aiohttp>=3.9.0
+flask>=2.3.0
+waitress>=2.1.0
+pyftpdlib>=1.5.9
+wsgidav>=4.1.0
+cheroot>=10.0.0
