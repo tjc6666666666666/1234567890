@@ -1,0 +1,37 @@
+{
+    "api_url": {
+        "description": "随机图片API地址（保留原有功能）",
+        "type": "string",
+        "hint": "填写获取随机图片的API地址",
+        "default": "",
+        "obvious_hint": true
+    },
+    "http_port": {
+        "description": "HTTP网页服务端口",
+        "type": "integer",
+        "hint": "网页文件浏览器的访问端口",
+        "default": 8080,
+        "obvious_hint": true
+    },
+    "ftp_port": {
+        "description": "FTP服务端口",
+        "type": "integer",
+        "hint": "FTP客户端连接的端口",
+        "default": 2121,
+        "obvious_hint": true
+    },
+    "webdav_port": {
+        "description": "WebDAV服务端口",
+        "type": "integer",
+        "hint": "WebDAV客户端挂载的端口",
+        "default": 8081,
+        "obvious_hint": true
+    },
+    "default_root": {
+        "description": "文件服务器默认根目录（留空自动适配系统）",
+        "type": "string",
+        "hint": "例如：C:\\Users 或 /home，留空则Windows显示驱动器/Linux显示根目录",
+        "default": "",
+        "obvious_hint": false
+    }
+}
