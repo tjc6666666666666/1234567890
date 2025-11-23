@@ -8,21 +8,21 @@
     },
     "http_port": {
         "description": "HTTP网页服务端口",
-        "type": "integer",
+        "type": "int",
         "hint": "网页文件浏览器的访问端口",
         "default": 8080,
         "obvious_hint": true
     },
     "ftp_port": {
         "description": "FTP服务端口",
-        "type": "integer",
+        "type": "int",
         "hint": "FTP客户端连接的端口",
         "default": 2121,
         "obvious_hint": true
     },
     "webdav_port": {
         "description": "WebDAV服务端口",
-        "type": "integer",
+        "type": "int",
         "hint": "WebDAV客户端挂载的端口",
         "default": 8081,
         "obvious_hint": true
