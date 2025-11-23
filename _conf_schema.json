@@ -17,7 +17,7 @@
         "description": "FTP服务端口",
         "type": "int",
         "hint": "FTP客户端连接的端口",
-        "default": 2121,
+        "default": 21211,
         "obvious_hint": true
     },
     "webdav_port": {
